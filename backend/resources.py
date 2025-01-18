@@ -1,0 +1,275 @@
+from flask import jsonify, request, current_app as app
+from flask_restful import Api, Resource, fields, marshal_with
+from flask_security import auth_required, current_user,roles_required
+from backend.models import *
+
+cache = app.cache
+
+api = Api(prefix='/api')
+
+# Fields for service representation
+service_fields = {
+    'id': fields.Integer,
+    'name': fields.String,
+    'price': fields.Integer,
+    'time_required': fields.Integer,
+    'description': fields.String,
+    'professionals': fields.List(fields.String),
+}
+
+class ServiceAPI(Resource):
+
+    @auth_required
+    @marshal_with(service_fields)
+    def get(self, service_id):
+        service = Service.query.get(service_id)
+
+        if not service:
+            return {"message": "Service not found"}, 404
+        return service
+    
+    @auth_required('token')
+    @roles_required('admin')
+    @marshal_with(service_fields)
+    def put(self,service_id):
+        service= Service.query.filter_by(id= service_id).first()
+        data= request.get_json()
+        
+        service.name = data.get('name')
+        service.price = data.get('price')
+        service.time_required = data.get('time_required')
+        service.description = data.get('description')
+        db.session.commit()
+        
+
+        
+    
+    @auth_required('token')
+    @roles_required('admin')
+    def delete(self, service_id):
+        service = Service.query.get(service_id)
+        db.session.delete(service)
+        db.session.commit()
+
+@auth_required('token')
+@app.route("/service_list/<string:category>",methods=["GET"])  
+@marshal_with(service_fields)  
+def s_list(category):
+    services= Service.query.filter_by(name=category).all()
+    return services
+
+class ServiceListAPI(Resource):
+
+    @auth_required('token')
+    @roles_required("admin")
+    @cache.cached(timeout=5, key_prefix="service_list")
+    @marshal_with(service_fields)
+    def get(self):
+        services = Service.query.all()
+        return services
+    
+    @auth_required('token')
+    @roles_required("admin")
+    @marshal_with(service_fields)
+    def post(self):
+        data = request.get_json()
+        name = data.get('name')
+        price = data.get('price')
+        time_required = data.get('time_required')
+        description = data.get('description')
+
+        service = Service(name=name, price=price, time_required=time_required, description=description)
+
+        db.session.add(service)
+        db.session.commit()
+        return jsonify({'message': 'Service created successfully'})
+    
+
+
+# Fields for user listing
+user_list_fields = {
+    'id': fields.Integer,
+    'email': fields.String,
+    'service_id': fields.Integer,
+    'active': fields.Boolean,
+}
+
+class UserListAPI(Resource):
+
+    @auth_required('token')
+    @marshal_with(user_list_fields)
+    def get(self):
+        query = request.args.get('query')
+
+        if query:
+            users = User.query.join(User.roles).filter(
+                Role.name == 'user',
+                User.active == True,
+                User.email.ilike(f'%{query}%')
+            ).all()
+        else:
+            users = User.query.join(User.roles).filter(
+                Role.name == 'user',
+                User.active == True
+            ).all()
+
+        return users
+
+
+# Fields for a single user
+user_fields = {
+    'id': fields.Integer,
+    'email': fields.String,
+    'service_id': fields.Integer,
+    'active': fields.Boolean,
+    'customer_requests': fields.List(fields.String),
+    'professional_requests': fields.List(fields.String),
+}
+
+class UserAPI(Resource):
+
+   
+    @marshal_with(user_fields)
+    def get(self, user_id):
+        user = User.query.get(user_id)
+        if not user:
+            return {"message": "User not found"}, 404
+        return user
+
+
+class NAAPI(Resource):
+
+    @auth_required('token')
+    @marshal_with(service_fields)
+    def get(self):
+        # Fetch services offered by professionals that the current user has interacted with
+        requests = Request.query.filter_by(customer_id=current_user.id).all()
+        service_ids = {request.service_id for request in requests}
+        services = Service.query.filter(Service.id.in_(service_ids)).all()
+
+        if not services:
+            return {"message": "No services available"}, 200
+        return services
+    
+customer_fields={
+    "id": fields.Integer,
+    "user_id":fields.Integer,
+    "name": fields.String,
+    "address": fields.String,
+    "pin_code":fields.Integer,
+    "user": fields.Nested({
+        "email": fields.String,
+        "active": fields.Boolean
+    }),
+}
+
+
+class CustomerList(Resource):
+    @marshal_with(customer_fields)
+    @auth_required('token')
+    @roles_required("admin")
+    def get(self):
+        customers= CustomerInfo.query.all()
+
+        return customers
+
+professional_fields={
+    "id": fields.Integer,
+    "user_id":fields.Integer,
+    "name": fields.String,
+    "address": fields.String,
+    "experience": fields.String,
+    "service_name":fields.String,
+    "pin_code": fields.Integer,
+    "status": fields.String,
+    "user": fields.Nested({
+        "email": fields.String,
+        "active": fields.Boolean
+    }),
+}
+
+class ProfessionalList(Resource):
+    @marshal_with(professional_fields)
+    @auth_required('token')
+    @roles_required('admin')
+    def get(self):
+        professionals= ProfessionalInfo.query.all()
+        return professionals
+
+class ProfessionalIDField(fields.Raw):
+    def format(self, value):
+        # Check if the value is None or not assigned
+        if value is None:
+            return "Not Assigned"
+        return value  # Return the integer value if it exists
+
+
+request_fields={
+    "id": fields.Integer,
+    "customer_id": fields.Integer,
+    "professional_id":ProfessionalIDField(),
+    "service_id": fields.Integer,
+    "status": fields.String,
+    "requested_date": fields.DateTime,
+    "completion_date":fields.DateTime,
+    "rating": fields.Integer,
+    "remarks": fields.String
+
+}  
+class RequestList(Resource):
+    @auth_required('token')
+    @roles_required('admin')
+    @marshal_with(request_fields)
+    def get(self):
+        requests= Request.query.all()
+        return requests      
+
+
+@app.route('/book_request/<string:u_id>/<string:s_id>',methods=['POST'])
+def create_request(s_id,u_id):
+    customer= CustomerInfo.query.filter_by(user_id= u_id).first()
+    service= Service.query.filter_by(id=s_id).first()
+    new_request= Request(customer_id= customer.id,service_id= service.id)
+    db.session.add(new_request)
+    db.session.commit()
+    return {"message": "Request created   successfully"}
+
+
+        
+
+
+
+
+
+
+
+
+@app.route('/service_history/<string:id>',methods=["GET","POST"])
+@auth_required('token')
+@roles_required('customer')
+@marshal_with(request_fields)
+def Req_history(id):
+    customer= CustomerInfo.query.filter_by(user_id=id).first()
+    requests= Request.query.filter_by(customer_id = customer.id).all()
+    return requests
+
+
+
+
+
+
+
+
+
+
+
+
+# Add resources to the API
+api.add_resource(RequestList,"/request_list")
+api.add_resource(ProfessionalList,'/professional_list')
+api.add_resource(CustomerList,'/customer_list')
+api.add_resource(ServiceAPI, '/services/<int:service_id>')
+api.add_resource(ServiceListAPI, '/service_list')
+api.add_resource(UserListAPI, '/users')
+api.add_resource(UserAPI, '/users/<int:user_id>')
+api.add_resource(NAAPI, '/service/NAAPI')
