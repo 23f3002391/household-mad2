@@ -142,14 +142,13 @@ export default {
                 <tbody>
                     <tr v-for="request in requests" :key="request.id">
                         <td> {{ request.id }} </td>
-                        <td> {{ request.professional_name || 'Unassigned' }} </td>
-                        <td>{{ request.service_name }}</td>
-                        <td>{{ request.service_description }}</td>
-                        <td>{{ request.service_price }}</td>
-                        <td>{{ request.customer_name }}</td>
-                        <td>{{ request.customer_location }}</td>
-                        <td>{{ request.date_of_request }}</td>
-                        <td>{{ request.date_of_completion || 'Pending' }}</td>
+                        <td> {{ request.professional.name || 'Unassigned' }} </td>
+                        <td>{{ request.service.description }}</td>
+                        <td>{{ request.service.price }}</td>
+                        <td>{{ request.customer.name }}</td>
+                        <td>{{ request.customer.address }}</td>
+                        <td>{{ request.request_date }}</td>
+                        <td>{{ request.completion_date || 'Pending' }}</td>
                         <td>{{ request.status }}</td>
                     </tr>
                 </tbody>

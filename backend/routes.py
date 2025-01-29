@@ -41,6 +41,7 @@ def customerRegister():
     email = data.get('email')  
     password = data.get('password')
     name= data.get("name")
+    phone_no= data.get("phone_no")
     address= data.get("address")
     pin_code= data.get("pin_code")
 
@@ -61,7 +62,7 @@ def customerRegister():
 
         user = datastore.find_user(email = email)
 
-        new_customer= CustomerInfo(user_id= user.id, name=name, address=address,pin_code= pin_code)
+        new_customer= CustomerInfo(user_id= user.id, name=name, address=address,pin_code= pin_code,phone_no= phone_no)
         db.session.add(new_customer)
         db.session.commit()
         return jsonify({"message" : "user created"}), 200
@@ -78,6 +79,7 @@ def professionalRegister():
     name=data.get("name")
     s_name = data.get('service_name')
     address = data.get("address")
+    phone_no=data.get("phone_no")
     pin_code = data.get("pin_code")
     experience= data.get("experience")
 
@@ -105,6 +107,7 @@ def professionalRegister():
             name=name,
             address=address,
             pin_code=pin_code,
+            phone_no=phone_no,
             service_name=s_name,
             experience= experience
         )
@@ -173,3 +176,34 @@ def service_categories():
 # def s_list(category):
 #     services= Service.query.filter_by(name=category).all()
 #     return services
+
+@app.route('/prof_request_status/<string:u_id>/<string:req_id>/<string:status>',methods=["GET","POST"])
+def professional_request_status(u_id,req_id,status):
+    p1= ProfessionalInfo.query.filter_by(user_id= u_id).first()
+    r1= Request.query.filter_by(id= req_id).first()
+    if status=="Accept":
+        r1.status="Assigned"
+        r1.professional_id= p1.id
+        db.session.commit()
+        return {"message": "profesional request status got updated"}
+    elif status=="Reject":
+        if p1.rejected_requests:
+            p1.rejected_requests += f",{r1.id}"
+        else:
+            p1.rejected_requests= str(r1.id)
+        db.session.commit()
+        return {"message": "profesional request status got updated"}
+
+   
+
+
+
+
+
+@app.route('/dropdown/all_services',methods=["GET","POST"])
+def dropdown_s():
+    services= Service.query.all()
+    d_list=[]
+    for service in services:
+        d_list.append(service.description)
+    return d_list

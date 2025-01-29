@@ -1,35 +1,48 @@
 export default {
     props: ["category"],
     template: `
-      <div class="services">
-        <h3>Best {{ category }} Package</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Service Name</th>
-              <th>Description</th>
-              <th>Time Required</th>
-              <th>Base Price</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="service in services" :key="service.id">
-              <td>{{ service.id }}</td>
-              <td>{{ service.name }}</td>
-              <td>{{ service.description }}</td>
-              <td>{{ service.time_required }}</td>
-              <td>{{ service.price }}</td>
-              <td>
-                <button class="close-btn" @click="$emit('book-request', service.id)">
-                  Book
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <div class="services" style="font-family: Arial, sans-serif; margin: 20px;">
+  <h3 style="color: #333; text-align: center; margin-bottom: 15px;">
+    Best {{ category }} Package
+  </h3>
+  <table
+    style="width: 100%; border-collapse: collapse; text-align: left; margin-bottom: 20px;"
+  >
+    <thead>
+      <tr style="background-color: #f4f4f4; color: #333;">
+        <th style="border: 1px solid #ddd; padding: 10px;">ID</th>
+        <th style="border: 1px solid #ddd; padding: 10px;">Service Name</th>
+        <th style="border: 1px solid #ddd; padding: 10px;">Description</th>
+        <th style="border: 1px solid #ddd; padding: 10px;">Time Required</th>
+        <th style="border: 1px solid #ddd; padding: 10px;">Base Price</th>
+        <th style="border: 1px solid #ddd; padding: 10px;">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        v-for="service in services"
+        :key="service.id"
+        style="border: 1px solid #ddd; background-color: #fff;"
+      >
+        <td style="border: 1px solid #ddd; padding: 10px;">{{ service.id }}</td>
+        <td style="border: 1px solid #ddd; padding: 10px;">{{ service.name }}</td>
+        <td style="border: 1px solid #ddd; padding: 10px;">{{ service.description }}</td>
+        <td style="border: 1px solid #ddd; padding: 10px;">{{ service.time_required }}</td>
+        <td style="border: 1px solid #ddd; padding: 10px;">{{ service.price }}</td>
+        <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">
+          <button
+            class="close-btn"
+            @click="$emit('book-request', service.id)"
+            style="background-color: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;"
+          >
+            Book
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
     `,
     data() {
       return {

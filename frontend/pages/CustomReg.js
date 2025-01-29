@@ -38,6 +38,15 @@ export default {
             </div>
             <div class="form-group" style="margin-bottom: 15px;">
                 <input 
+                    placeholder="Phone Number"
+                    type="number" 
+                    v-model="phone_no" 
+                    class="form-control" 
+                    style="width: 100%; padding: 10px; font-size: 1rem;" 
+                />
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <input 
                     placeholder="Pincode" 
                     v-model="pin_code" 
                     class="form-control" 
@@ -60,6 +69,7 @@ export default {
             name: null,
             address: null,
             pin_code: null,
+            phone_no:null,
         };
     },
     methods: {
@@ -73,12 +83,13 @@ export default {
                     name: this.name,
                     address: this.address,
                     pin_code: this.pin_code,
+                    phone_no:this.phone_no,
                 }),
             });
     
             if (res.ok) {
                 // alert('Registration successful! Please log in.');
-                this.$router.push('/login'); // Redirect to login page
+                this.$router.push('/login') // Redirect to login page
             } else {
                 const data = await res.json();
                 alert(data.message || 'Error registering user.');

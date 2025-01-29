@@ -41,6 +41,7 @@ class CustomerInfo(db.Model):
     name = db.Column(db.String, nullable=False)
     address = db.Column(db.String, nullable=False)
     pin_code = db.Column(db.Integer, nullable=False)
+    phone_no= db.Column(db.Integer,nullable=False)
 
 
 class ProfessionalInfo(db.Model):
@@ -51,12 +52,14 @@ class ProfessionalInfo(db.Model):
     service_name = db.Column(db.String, nullable=False)
     experience = db.Column(db.String, nullable=False)
     address = db.Column(db.String, nullable=False)
+    phone_no= db.Column(db.Integer,nullable=False)
     status= db.Column(db.String,default='Pending')
     pin_code = db.Column(db.Integer, nullable=False)
+    rejected_requests= db.Column(db.String,nullable=True)
 
     # Foreign Key linking ProfessionalInfo to Service
     service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=True)
-    service = db.relationship("Service", back_populates="professionals")
+    service1 = db.relationship("Service", back_populates="professionals")
 
 
 class Service(db.Model):
@@ -67,10 +70,9 @@ class Service(db.Model):
     description = db.Column(db.String, nullable=False)
 
     # One-to-Many relationship with ProfessionalInfo
-    professionals = db.relationship("ProfessionalInfo", back_populates="service", lazy=True)
+    professionals = db.relationship("ProfessionalInfo", back_populates="service1", lazy=True)
 
-    # One-to-Many relationship with Request
-    requests = db.relationship("Request", backref="service", lazy=True)
+    requests= db.relationship('Request',back_populates='service2',lazy= True)
 
 
 class Request(db.Model):
@@ -86,5 +88,5 @@ class Request(db.Model):
 
     # Relationships
     customer = db.relationship('CustomerInfo', backref='requests')  # Plural backref
-    service= db.relationship('Service')
+    service2= db.relationship('Service',back_populates='requests')
     professional = db.relationship('ProfessionalInfo', backref='requests')  # Plural backref

@@ -210,10 +210,39 @@ request_fields={
     "professional_id":ProfessionalIDField(),
     "service_id": fields.Integer,
     "status": fields.String,
-    "requested_date": fields.DateTime,
+    "request_date": fields.DateTime,
     "completion_date":fields.DateTime,
     "rating": fields.Integer,
-    "remarks": fields.String
+    "remarks": fields.String,
+    "service2":fields.Nested({
+        "name": fields.String,
+        'price': fields.Integer,
+        'time_required': fields.Integer,
+        'description': fields.String
+    }),
+    "customer":fields.Nested({
+        "user_id":fields.Integer,
+        "name": fields.String,
+        "address": fields.String,
+        "pin_code":fields.Integer,
+        "user": fields.Nested({
+            "email": fields.String,
+            "active": fields.Boolean
+    }),
+    }),
+    "professional":fields.Nested({
+        "user_id":fields.Integer,
+        "name": fields.String,
+        "address": fields.String,
+        "experience": fields.String,
+        "service_name":fields.String,
+        "pin_code": fields.Integer,
+        "status": fields.String,
+        "user": fields.Nested({
+            "email": fields.String,
+            "active": fields.Boolean
+        }),
+    })
 
 }  
 class RequestList(Resource):
@@ -234,16 +263,6 @@ def create_request(s_id,u_id):
     db.session.commit()
     return {"message": "Request created   successfully"}
 
-
-        
-
-
-
-
-
-
-
-
 @app.route('/service_history/<string:id>',methods=["GET","POST"])
 @auth_required('token')
 @roles_required('customer')
@@ -252,6 +271,50 @@ def Req_history(id):
     customer= CustomerInfo.query.filter_by(user_id=id).first()
     requests= Request.query.filter_by(customer_id = customer.id).all()
     return requests
+
+
+@app.route('/prof_service/<string:u_id>',methods=["GET","POST"])
+@marshal_with(request_fields)
+def prof_offered_request(u_id):
+    p1= ProfessionalInfo.query.filter_by(user_id=u_id).first()
+    s1= Service.query.filter_by(description= p1.service_name).first()
+    requests= Request.query.filter_by(service_id= s1.id,status='requested').all()
+    rejected_id_list=p1.rejected_requests.split(',') if p1.rejected_requests else []
+    offered_service=[]
+    
+    for request in requests:
+        if str(request.id) not in rejected_id_list:
+            offered_service.append(request)
+              
+    return offered_service
+
+
+@app.route('/prof_closed_request/<string:u_id>',methods=["GET","POST"])
+@marshal_with(request_fields)
+def prof_closed_request(u_id):
+    p1= ProfessionalInfo.query.filter_by(user_id=u_id).first()
+    requests= Request.query.filter_by(professional_id= p1.id,status='Completed').all()
+    return requests
+
+@app.route('/prof_accepted_request/<string:u_id>',methods=["GET","POST"])
+@marshal_with(request_fields)
+def prof_accepted_request(u_id):
+    p1= ProfessionalInfo.query.filter_by(user_id=u_id).first()
+    requests= Request.query.filter_by(professional_id= p1.id,status='Assigned').all()
+    return requests
+
+@app.route('/prof_rejected_request/<string:u_id>',methods=["GET","POST"]) 
+@marshal_with(request_fields)
+def rejectedRequest_by_prof(u_id):
+    p1= ProfessionalInfo.query.filter_by(user_id= u_id).first()
+    rejected_id_list=p1.rejected_requests.split(',') if p1.rejected_requests else []
+    rejected_requests_object_list=[]
+    if rejected_id_list:
+        for r_id in rejected_id_list:
+            request= Request.query.filter_by(id= r_id).first()
+            rejected_requests_object_list.append(request)
+
+    return rejected_requests_object_list 
 
 
 

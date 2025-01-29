@@ -29,13 +29,18 @@ export default {
                 />
             </div>
             <div class="form-group" style="margin-bottom: 15px;">
-                <input 
-                    placeholder="Service Type" 
+                <select 
                     v-model="service_name" 
                     class="form-control" 
-                    style="width: 100%; padding: 10px; font-size: 1rem;" 
-                />
-            </div>
+                    placeholder='select service name'
+                    style="width: 100%; padding: 10px; font-size: 1rem;"
+                >
+                    <option value="" disabled selected>Select Service Type</option> <br/>
+                    <option v-for="service in dropdown_services"   >
+                           {{ service }}
+                    </option>
+                </select>
+            </div><br/>
             <div class="form-group" style="margin-bottom: 15px;">
                 <input 
                     placeholder="Experience" 
@@ -48,6 +53,15 @@ export default {
                 <input 
                     placeholder="Address" 
                     v-model="address" 
+                    class="form-control" 
+                    style="width: 100%; padding: 10px; font-size: 1rem;" 
+                />
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <input 
+                    placeholder="Phone Number"
+                    type="number" 
+                    v-model="phone_no" 
                     class="form-control" 
                     style="width: 100%; padding: 10px; font-size: 1rem;" 
                 />
@@ -76,8 +90,11 @@ export default {
             password: null,
             name: null,
             service_name: null,
+            address:null,
+            phone_no:null,
             experience:null,
             pin_code: null,
+            dropdown_services:[]
 
         }
     },
@@ -92,6 +109,7 @@ export default {
                     name: this.name,
                     service_name: this.service_name,
                     address: this.address,
+                    phone_no:this.phone_no,
                     experience: this.experience, 
                     pin_code: this.pin_code,
                 }),
@@ -104,5 +122,26 @@ export default {
                 alert(data.message || 'Error registering user.');
             }
         },
+        async dropdown(){
+            const res= await fetch(location.origin+ `/dropdown/all_services`,
+                {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+                }
+            )
+            if (res.ok){
+                console.log('services is showing')
+                this.dropdown_services = await res.json()
+                console.log(this.dropdown_services)
+
+            } else {
+                const data = await res.json();
+                alert(data.message || 'Error registering user.');
+            }
+        }
+
     },
+    mounted(){
+        this.dropdown()
+    }
 };
