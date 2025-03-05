@@ -100,7 +100,7 @@ def professionalRegister():
 
         # Step 2: Retrieve the user
         user = datastore.find_user(email=email)
-
+        s= Service.query.filter_by(description = s_name).first()
         # Step 3: Create ProfessionalInfo instance
         new_professional = ProfessionalInfo(
             user_id=user.id,
@@ -109,7 +109,8 @@ def professionalRegister():
             pin_code=pin_code,
             phone_no=phone_no,
             service_name=s_name,
-            experience= experience
+            experience= experience,
+            service_id= s.id
         )
 
         # Step 4: Add and commit the ProfessionalInfo instance
@@ -207,3 +208,59 @@ def dropdown_s():
     for service in services:
         d_list.append(service.description)
     return d_list
+
+
+@app.route('/admin_search/<string:role>/<string:pname>', methods=['GET'])
+def admin_search(role, pname):
+    if role == "customer":
+        c1 = CustomerInfo.query.filter_by(name=pname).first()  # FIXED
+        if not c1:
+            return {"error": "Customer not found"}, 404  # FIXED
+        
+        return {
+            'id': c1.id,
+            'email': c1.user.email,
+            'user_id': c1.user.id,
+            'name': c1.name,
+            'address': c1.address,
+            'pin_code': c1.pin_code,
+            'active': c1.user.active   
+        }
+    
+    else:
+        p1 = ProfessionalInfo.query.filter_by(status=pname).first()  # FIXED
+        if not p1:
+            return {"error": "Professional not found"}, 404  # FIXED
+        
+        return {
+            'id': p1.id,
+            'email': p1.user.email,
+            'user_id': p1.user.id,
+            'name': p1.name,
+            'address': p1.address,
+            'pin_code': p1.pin_code, 
+            'experience': p1.experience,
+            'service_name': p1.service_name,
+            'status': p1.status,
+            'active': p1.user.active 
+        }
+
+@app.route('/c_search/<string:category>/<string:query>', methods=['GET'])
+def custom_search(category,query):
+    if category == "name":
+        services= Service.query.filter_by(name= query).all()
+        return jsonify([service.to_dict() for service in services])
+
+        
+    elif category == "location":
+        prof= ProfessionalInfo.query.filter_by(address= query).all()
+        if prof is None:
+            return {"message": "No professional found"}
+        return jsonify([p.to_dict() for p in prof])
+    elif category == "pin_code":
+        prof= ProfessionalInfo.query.filter_by(pin_code= query).all()
+        if prof is None:
+            return {"message": "No professional found"}
+        return jsonify([p.to_dict() for p in prof])
+
+

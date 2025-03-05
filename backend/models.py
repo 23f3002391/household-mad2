@@ -41,7 +41,7 @@ class CustomerInfo(db.Model):
     name = db.Column(db.String, nullable=False)
     address = db.Column(db.String, nullable=False)
     pin_code = db.Column(db.Integer, nullable=False)
-    phone_no= db.Column(db.Integer,nullable=False)
+    phone_no= db.Column(db.String,nullable=False)
 
 
 class ProfessionalInfo(db.Model):
@@ -52,15 +52,27 @@ class ProfessionalInfo(db.Model):
     service_name = db.Column(db.String, nullable=False)
     experience = db.Column(db.String, nullable=False)
     address = db.Column(db.String, nullable=False)
-    phone_no= db.Column(db.Integer,nullable=False)
+    phone_no= db.Column(db.String,nullable=False)
     status= db.Column(db.String,default='Pending')
     pin_code = db.Column(db.Integer, nullable=False)
     rejected_requests= db.Column(db.String,nullable=True)
 
     # Foreign Key linking ProfessionalInfo to Service
     service_id = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=True)
-    service1 = db.relationship("Service", back_populates="professionals")
+    service1 = db.relationship("Service", back_populates="professionals",foreign_keys=[service_id], lazy=True)
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "service_name": self.service_name,
+            "experience": self.experience,
+            "address": self.address,
+            "pin_code": self.pin_code,
+            "phone_no": self.phone_no,
+            "status": self.status,
+            "service1": self.service1.to_dict() if self.service1 else None
+        }
 
 class Service(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -73,6 +85,15 @@ class Service(db.Model):
     professionals = db.relationship("ProfessionalInfo", back_populates="service1", lazy=True)
 
     requests= db.relationship('Request',back_populates='service2',lazy= True)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "price": self.price,
+            "time_required": self.time_required,
+            "description": self.description
+        }
 
 
 class Request(db.Model):
