@@ -88,7 +88,7 @@ export default {
             });
     
             if (res.ok) {
-                // alert('Registration successful! Please log in.');
+                alert('Registration successful! Please log in.');
                 this.$router.push('/login') // Redirect to login page
             } else {
                 const data = await res.json();

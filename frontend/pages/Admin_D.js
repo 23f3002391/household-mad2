@@ -12,6 +12,7 @@ export default {
 
     <!-- Services Section -->
     <section class="mb-5">
+     <button btn-button-success @click="create_csv"> Get Blog Data </button>
         <h3 class="section-title text-primary border-bottom pb-2">Services</h3>
         <div class="table-responsive">
             <table class="table table-striped table-hover align-middle">
@@ -143,12 +144,13 @@ export default {
                     <tr v-for="request in requests" :key="request.id">
                         <td> {{ request.id }} </td>
                         <td> {{ request.professional.name || 'Unassigned' }} </td>
-                        <td>{{ request.service.description }}</td>
-                        <td>{{ request.service.price }}</td>
+                        <td>{{ request.service2.name }}</td>
+                        <td>{{ request.service2.description }}</td>
+                        <td>{{ request.service2.price }}</td>
                         <td>{{ request.customer.name }}</td>
                         <td>{{ request.customer.address }}</td>
                         <td>{{ request.request_date }}</td>
-                        <td>{{ request.completion_date || 'Pending' }}</td>
+                        <td>{{ request.completion_date || 'Pending' }} </td>
                         <td>{{ request.status }}</td>
                     </tr>
                 </tbody>
@@ -173,6 +175,25 @@ export default {
     },
 
     methods: {
+        async create_csv(){
+            const res = await fetch(location.origin + '/create-csv', {
+                headers : {
+                    'Authentication-Token' : this.$store.state.auth_token
+                }
+            })
+            const task_id = (await res.json()).task_id
+
+            const interval = setInterval(async() => {
+                const res = await fetch(`${location.origin}/get-csv/${task_id}` )
+                if (res.ok){
+                    console.log('data is ready')
+                    window.open(`${location.origin}/get-csv/${task_id}`)
+                    clearInterval(interval)
+                }
+
+            }, 100)
+            
+        },
         
         async customerlist(){
             const res= await fetch(location.origin +"/api/customer_list",

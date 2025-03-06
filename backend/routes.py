@@ -1,12 +1,30 @@
-from flask import current_app as app, jsonify, render_template, request
+from flask import current_app as app, jsonify, render_template, request ,send_file
 from flask_security import auth_required, verify_password, hash_password, current_user,roles_required
 from backend.models import *
 import traceback
+from backend.celery.tasks import create_csv
+from celery.result import AsyncResult
 
 datastore = app.security.datastore
 @app.get("/")
 def home():
     return render_template('index.html')
+
+@auth_required('token') 
+@app.get('/get-csv/<id>')
+def getCSV(id):
+    result = AsyncResult(id)
+
+    if result.ready():
+        return send_file(f'./backend/celery/user-downloads/{result.result}'), 200
+    else:
+        return {'message' : 'task not ready'}, 405
+
+@auth_required('token') 
+@app.get('/create-csv')
+def createCSV():
+    task = create_csv.delay()
+    return {'task_id' : task.id}, 200
 
 @app.get("/protected")
 @auth_required('token')

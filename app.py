@@ -4,6 +4,8 @@ from backend.config import LocalDevelopmentConfig
 from backend.models import db, User,Role,UserRoles
 from flask_security import Security, SQLAlchemyUserDatastore, auth_required
 from flask_caching import Cache
+from backend.celery.celery_factory import celery_init_app
+import flask_excel as excel
 
 def createapp():
     app= Flask(__name__, template_folder='frontend', static_folder='frontend', static_url_path='/static')
@@ -30,10 +32,14 @@ def createapp():
     return app
 
 app = createapp()
+celery_app= celery_init_app(app)
 
 import backend.create_init_data
 
 import backend.routes
+import backend.celery.celery_schedule
+
+excel.init_excel(app)
 
 if (__name__=="__main__"):
     app.run(debug=True)
