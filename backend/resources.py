@@ -235,6 +235,7 @@ request_fields={
         "name": fields.String,
         "address": fields.String,
         "experience": fields.String,
+        'phone_no': fields.Integer,
         "service_name":fields.String,
         "pin_code": fields.Integer,
         "status": fields.String,

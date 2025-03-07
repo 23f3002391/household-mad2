@@ -262,7 +262,8 @@ def admin_search(role, pname):
             'status': p1.status,
             'active': p1.user.active 
         }
-
+@auth_required('token')
+@roles_required('customer')
 @app.route('/c_search/<string:category>/<string:query>', methods=['GET'])
 def custom_search(category,query):
     if category == "name":
@@ -281,4 +282,50 @@ def custom_search(category,query):
             return {"message": "No professional found"}
         return jsonify([p.to_dict() for p in prof])
 
+
+
+@app.route('/close_request', methods=['POST', 'PUT'])  # Fixed allowed methods
+@auth_required('token')
+@roles_required('customer')
+def close_request():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid request data"}), 400
+
+    req_id = data.get('r_id')
+    r1 = Request.query.get(req_id)
+
+    if not r1:
+        return jsonify({"error": "Request not found"}), 404  # Handle invalid request ID
+
+    rating = data.get('rating')
+    remarks = data.get('remarks')
+
+    if request.method == 'POST':
+        if rating is None or not (1 <= int(rating) <= 5):  # Basic rating validation
+            return jsonify({"error": "Invalid rating. It should be between 1 and 5."}), 400
+        
+        r1.rating = int(rating)
+        r1.remarks = remarks if remarks else ""
+        r1.completion_date = datetime.now()
+        r1.status = "Completed"
+
+        db.session.commit()
+        return jsonify({"message": "Request closed successfully"}), 200
+
+    elif request.method == 'PUT':
+        if rating:
+            try:
+                rating = int(rating)
+                if not (1 <= rating <= 5):
+                    return jsonify({"error": "Invalid rating. It should be between 1 and 5."}), 400
+                r1.rating = rating
+            except ValueError:
+                return jsonify({"error": "Rating must be a valid integer"}), 400
+
+        if remarks is not None:
+            r1.remarks = remarks
+
+        db.session.commit()
+        return jsonify({"message": "Request edited successfully"}), 200
 

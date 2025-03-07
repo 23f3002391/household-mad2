@@ -144,7 +144,7 @@ export default{
     methods:{
         
         closePopup() {
-            this.$emit("close"); // Close the popup via parent
+            this.$emit("close",this.request.id); // Close the popup via parent
           },
         starStyle(star) {
             return {

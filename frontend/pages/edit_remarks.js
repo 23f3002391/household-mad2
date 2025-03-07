@@ -37,7 +37,7 @@ export default{
         <textarea v-model="remarks"  rows="3" :style="textareaStyle"></textarea>
 
         <div :style="buttonContainerStyle">
-          <button type="submit" :style="submitButtonStyle">Submit</button>
+          <button type="submit" :style="submitButtonStyle">Save Changes</button>
           <button type="button" @click="closePopup" :style="closeButtonStyle">Close</button>
         </div>
       </form>
@@ -145,12 +145,12 @@ export default{
     methods:{
         submitChanges() {
           const data={ rating: this.rating, remarks: this.remarks,r_id:this.id1 }
-            console.log("Changes submitted:",data);
-            this.$emit("submit", data); // Emit to parent
-            this.closePopup();
+          console.log("Changes submitted:",data);
+          this.$emit("submit", data); // Emit to parent
+          this.closePopup();
           },
         closePopup() {
-            this.$emit("close"); // Close the popup via parent
+            this.$emit("close",this.id1); // Close the popup via parent
           },
         starStyle(star) {
             return {

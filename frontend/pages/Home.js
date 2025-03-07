@@ -21,7 +21,7 @@ export default {
           <p class="text-gray-600 mt-2">{{ service.description }}</p>
           <span :style="{color:'blue'}" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105">
             Book Now
-          <span>
+          </span>
         </div>
       </div>
     </div>

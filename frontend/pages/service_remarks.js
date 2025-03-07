@@ -150,7 +150,7 @@ export default{
             this.closePopup();
           },
         closePopup() {
-            this.$emit("close"); // Close the popup via parent
+            this.$emit("close",this.id1); // Close the popup via parent
           },
         starStyle(star) {
             return {

@@ -1,4 +1,7 @@
 import Service_Booking from "../components/Service_Booking.js";
+import service_remarks from "./service_remarks.js";
+import request_details from "./request_details.js";
+import edit_remarks from "./edit_remarks.js";
 
 export default {
   template: `<div id="app" class="container" style="font-family: Arial, sans-serif; margin: 20px;">
@@ -66,24 +69,42 @@ export default {
         <td style="border: 1px solid #ddd; padding: 8px;" v-if="request.status=='Assigned' " >{{ request.professional.name }}</td>
         <td style="border: 1px solid #ddd; padding: 8px;" v-else >Profesisonal not assigned</td>
         <td style="border: 1px solid #ddd; padding: 8px;" v-if="request.status=='Assigned' " >{{ request.professional.phone_no }}</td>
-        <td style="border: 1px solid #ddd; padding: 8px;" v-else>Profesisonal not assigned</td>
+        <td style="border: 1px solid #ddd; padding: 8px;" v-else >Profesisonal not assigned</td>
         <td style="border: 1px solid #ddd; padding: 8px;">{{ request.status }}</td>
         <td style="border: 1px solid #ddd; padding: 8px;">{{ request.service2.name }}</td>
-        <td
-          v-if="request.status === 'Completed'"
-          style="border: 1px solid #ddd; padding: 8px;"
-        >
+        <td v-if="request.status === 'Assigned'" style="border: 1px solid #ddd; padding: 8px;">
+          <button
+            class="btn btn-primary"
+            style="background-color:rgb(0, 255, 30); color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;"
+            @click="toggleEditRequest(request.id)"
+          >
+            Edit Request
+          </button> ||
+          <button
+            class="btn btn-primary"
+            style="background-color:rgb(255, 0, 0); color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;"
+            @click="togglerequest1(request.id)"
+          >
+            Close it
+          </button>
+        </td>
+        <td v-else-if="request.status === 'Completed'" style="border: 1px solid #ddd; padding: 8px;">
           <button
             class="btn btn-primary"
             style="background-color: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;"
+            @click="togglerequest2(request.id)"
           >
-            Close it
+            View Request Details
           </button>
         </td>
         <td v-else style="border: 1px solid #ddd; padding: 8px;">
           Request is ongoing
         </td>
+        <request_details v-if="viewRequestPopup[request.id]" :request="request"  @close="togglerequest2" />
+        <edit_remarks v-if="editRequestPopup[request.id]" :request="request" @submit='editRequest'  @close="toggleEditRequest" />
+        <service_remarks v-if="closeRequestPopup[request.id]" :request="request" @submit="close_request"  @close="togglerequest1" />
       </tr>
+      
     </tbody>
   </table>
 </div>
@@ -92,11 +113,18 @@ export default {
     return {
       service_types: [],
       request_list: [],
-      showServiceBook: {}, // Store visibility states for categories
+      showServiceBook: {},
+      editRequestPopup:{} ,
+      closeRequestPopup:{},
+      viewRequestPopup:{},
+      // Store visibility states for categories
     };
   },
   components: {
     Service_Booking,
+    service_remarks,
+    request_details,
+    edit_remarks
   },
   methods: {
     async typeList() {
@@ -138,6 +166,32 @@ export default {
         !this.showServiceBook[category]
       );
     },
+    togglerequest1(id) {
+      // Toggle the visibility of request_details for a specific request
+      this.$set(
+        this.closeRequestPopup,
+        id,
+        !this.closeRequestPopup[id]
+      );
+    },
+    togglerequest2(id) {
+      // Toggle the visibility of request_details for a specific request
+      this.$set(
+        this.viewRequestPopup,
+        id,
+        !this.viewRequestPopup[id]
+      );
+    },
+    toggleEditRequest(id) {
+      // Toggle the visibility of request_details for a specific request
+      this.$set(
+        this.editRequestPopup,
+        id,
+        !this.editRequestPopup[id]
+      );
+    }
+    ,
+    
     async book_request(s_id){
        const res= await fetch(location.origin+`/book_request/${this.$store.state.user_id}/${s_id}`,
         {method:"POST",
@@ -153,17 +207,51 @@ export default {
        if (res.ok) {
         alert('Service Request is created')
         console.log("Service request is created");
-        window.location.reload()
+        this.service_history()
         
       } else {
         const errorText = await res.text();
         console.error(`Error: ${res.status} - ${errorText}`);
       }
     },
-
+    async close_request(data){
+      const res= fetch(location.origin+`/close_request`,
+      {method:"POST",
+        headers:{
+          "Authentication-Token": this.$store.state.auth_token,
+          "Content-Type":'application/json'
+          
+        },
+        body:JSON.stringify(data)
+      })
+      if (res.ok){
+        console.log("Request is closed")
+        this.service_history()
+      }else{
+        const errorText = await res.text();
+        console.error(`Error: ${res.status} - ${errorText}`)
+      }
+    },
+    async editRequest(data){
+      const res= fetch(location.origin+`/close_request`,
+      {method:"PUT",
+        headers:{
+          "Authentication-Token": this.$store.state.auth_token,
+          "Content-Type":'application/json'
+          
+        },
+        body:JSON.stringify(data)
+      })
+      if (res.ok){
+        console.log("Request is edited");
+        this.service_history()
+      }else{
+        const errorText = await res.text();
+        console.error(`Error: ${res.status} - ${errorText}`);}
+    }  
   },
   mounted() {
     this.typeList();
     this.service_history();
   },
-};
+}
