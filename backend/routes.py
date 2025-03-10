@@ -4,6 +4,8 @@ from backend.models import *
 import traceback
 from backend.celery.tasks import create_csv
 from celery.result import AsyncResult
+from collections import Counter
+
 
 datastore = app.security.datastore
 @app.get("/")
@@ -45,7 +47,7 @@ def login():
     user = datastore.find_user(email = email)
 
     if not user:
-        return jsonify({"message" : "invalid email"}), 404
+        return jsonify({"message" : "user does not exist"}), 404
     
     if verify_password(password, user.password):
         return jsonify({'token' : user.get_auth_token(), 'email' : user.email, 'role' : user.roles[0].name, 'id' : user.id})
@@ -159,10 +161,12 @@ def professional_block_status(professionaId,status):
     u1=User.query.get(p1.user.id)
     if status== 'block':
         u1.active= False
+        p1.status= "Blocked"
         db.session.commit() 
         return {"message": "Professional block status updated successfully", "status": status}
     else:
         u1.active= True
+        p1.status= "Approved"
         db.session.commit() 
         return {"message": "Professional block status updated successfully", "status": status}    
 
@@ -329,3 +333,41 @@ def close_request():
         db.session.commit()
         return jsonify({"message": "Request edited successfully"}), 200
 
+@app.route('/prof_status/<string:id>',methods=['GET'])
+def prof_status(id):
+    prof= ProfessionalInfo.query.filter_by(user_id=id).first()
+    return {"status": prof.status}
+
+@app.route('/customer_status/<string:id>',methods=["GET"])
+def customer_status(id):
+    c1= CustomerInfo.query.filter_by(user_id=id).first()
+    status= c1.user.active
+    if status== True:
+        return {"status": "Active"}
+    else:
+        return {"status": "Blocked"}
+
+
+    
+    # Create a pie chart
+
+    # Fetch total requests per customer
+    
+@app.route('/request_summary',methods=["GET"])
+def request_type_summary():
+    requests=[request.status for request in Request.query.all() ]
+    request_count=Counter(requests)
+
+    labels = list(request_count.keys())
+    sizes = list(request_count.values())
+    return {'labels': labels, 'values': sizes}
+
+@app.route('/rating_summary', methods=['GET'])
+def customer_rating():
+    ratings = [request.rating for request in Request.query.all() if request.rating is not None]
+    rating_counts = Counter(ratings)  # Counts occurrences of each rating (1, 2, 3, etc.)
+    
+    # Get labels and sizes for the pie chart
+    labels = list(rating_counts.keys())
+    sizes = list(rating_counts.values())
+    return {'labels': labels, 'values': sizes}

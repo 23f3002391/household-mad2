@@ -9,6 +9,8 @@ import CustomReg from "../pages/CustomReg.js"
 import ProfReg from "../pages/ProfReg.js"
 import admin_search from "../pages/admin_search.js"
 import customer_search from "../pages/customer_search.js"
+import admin_summary from "../pages/admin_summary.js"
+// import c_profile from "../pages/c_profile.js"
 
 import store from "./store.js"
 
@@ -22,7 +24,9 @@ const routes= [
     {path: '/customReg', component:CustomReg},
     {path:'/profReg',component: ProfReg},
     {path:'/admin_search',component: admin_search, meta:{ requiresLogin: true, role:"admin"} },
-    {path:'/c_search',component: customer_search, meta:{ requiresLogin: true, role:"customer"} }
+    {path:'/c_search',component: customer_search, meta:{ requiresLogin: true, role:"customer"} },
+    {path:'/admin_summary',component: admin_summary, meta:{ requiresLogin: true, role:"admin"} },
+    // {path:'/edit_customer/:id',component: c_profile, meta:{ requiresLogin: true, role:"customer"} }
 ]
 
 const router = new VueRouter({

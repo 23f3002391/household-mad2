@@ -2,12 +2,14 @@ import Service_Booking from "../components/Service_Booking.js";
 import service_remarks from "./service_remarks.js";
 import request_details from "./request_details.js";
 import edit_remarks from "./edit_remarks.js";
+import c_profile from "../pages/c_profile.js";
 
 export default {
-  template: `<div id="app" class="container" style="font-family: Arial, sans-serif; margin: 20px;">
+  template: `
+  <div id="app" class="container" style="font-family: Arial, sans-serif; margin: 20px;" v-if="status=='Active'" > 
   <!-- Services Section -->
   <div class="services" style="margin-bottom: 20px;">
-    <h3 style="color: #333; text-align: center; margin-bottom: 10px;">Looking For?</h3>
+    <h3 style="color: #333; text-align: center; margin-bottom: 10px;"> Looking For? </h3>
     <div
       v-for="category in service_types"
       :key="category"
@@ -32,14 +34,14 @@ export default {
 
   <!-- Profile Section -->
   <div class="profile" style="margin-bottom: 20px; text-align: center;">
-    <router-link
-      :to="'/edit_customer/' + $store.state.user_id"
-      style="color: #007bff; text-decoration: none; font-size: 16px;"
+    <button
+      style="background-color: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;"
+      @click="profilePopup=true"
     >
-      View/Edit Profile
-    </router-link>
+      View Profile
+    </button>
   </div>
-
+  <c_profile v-if='profilePopup' :id= '$store.state.user_id' @close='closeProfile' />
   <!-- Service History Section -->
   <h3 style="color: #333; text-align: center; margin-bottom: 10px;">Service History</h3>
   <table
@@ -66,10 +68,10 @@ export default {
         <td style="border: 1px solid #ddd; padding: 8px;">{{ request.id }}</td>
         <td style="border: 1px solid #ddd; padding: 8px;">{{ request.request_date }}</td>
         <td style="border: 1px solid #ddd; padding: 8px;">{{ request.service2.description }}</td>
-        <td style="border: 1px solid #ddd; padding: 8px;" v-if="request.status=='Assigned' " >{{ request.professional.name }}</td>
-        <td style="border: 1px solid #ddd; padding: 8px;" v-else >Profesisonal not assigned</td>
-        <td style="border: 1px solid #ddd; padding: 8px;" v-if="request.status=='Assigned' " >{{ request.professional.phone_no }}</td>
-        <td style="border: 1px solid #ddd; padding: 8px;" v-else >Profesisonal not assigned</td>
+        <td style="border: 1px solid #ddd; padding: 8px;" v-if="request.status=='requested' " >Profesisonal not assigned</td>
+        <td style="border: 1px solid #ddd; padding: 8px;" v-else >{{ request.professional.name }}</td>
+        <td style="border: 1px solid #ddd; padding: 8px;" v-if="request.status=='requested' " >Profesisonal not assigned</td>
+        <td style="border: 1px solid #ddd; padding: 8px;" v-else >{{ request.professional.phone_no }} </td>
         <td style="border: 1px solid #ddd; padding: 8px;">{{ request.status }}</td>
         <td style="border: 1px solid #ddd; padding: 8px;">{{ request.service2.name }}</td>
         <td v-if="request.status === 'Assigned'" style="border: 1px solid #ddd; padding: 8px;">
@@ -108,6 +110,9 @@ export default {
     </tbody>
   </table>
 </div>
+<div v-else-if="status=='Blocked'" >
+  <h1 style="color:blue" > Your account  has been blocked by our admins </h1>
+</div>
 `,
   data() {
     return {
@@ -117,6 +122,8 @@ export default {
       editRequestPopup:{} ,
       closeRequestPopup:{},
       viewRequestPopup:{},
+      profilePopup:false,
+      status:null
       // Store visibility states for categories
     };
   },
@@ -124,9 +131,32 @@ export default {
     Service_Booking,
     service_remarks,
     request_details,
-    edit_remarks
+    edit_remarks,
+    c_profile
   },
   methods: {
+    closeProfile(){
+      this.profilePopup=false;
+    },
+    async checkStatus(){
+      const res= await fetch(location.origin+`/customer_status/${this.$store.state.user_id}`,
+      {method:"GET",
+        headers:{
+          "Authentication-Token": this.$store.state.auth_token,
+          "Content-Type":'application/json'
+          
+        }
+      })
+      if (res.ok){
+        this.data= await res.json()
+        this.status= this.data.status
+        console.log("Status checked",this.status)
+      }else{
+        const errorText = await res.text();
+        console.error(`Error: ${res.status} - ${errorText}`)
+      }
+    }, 
+
     async typeList() {
       const res = await fetch(location.origin + `/category_list`, {
         method: "GET",
@@ -215,7 +245,7 @@ export default {
       }
     },
     async close_request(data){
-      const res= fetch(location.origin+`/close_request`,
+      const res= await fetch(location.origin+`/close_request`,
       {method:"POST",
         headers:{
           "Authentication-Token": this.$store.state.auth_token,
@@ -233,7 +263,7 @@ export default {
       }
     },
     async editRequest(data){
-      const res= fetch(location.origin+`/close_request`,
+      const res= await fetch(location.origin+`/close_request`,
       {method:"PUT",
         headers:{
           "Authentication-Token": this.$store.state.auth_token,
@@ -243,6 +273,7 @@ export default {
         body:JSON.stringify(data)
       })
       if (res.ok){
+        console.log(res)
         console.log("Request is edited");
         this.service_history()
       }else{
@@ -253,5 +284,6 @@ export default {
   mounted() {
     this.typeList();
     this.service_history();
+    this.checkStatus();
   },
 }

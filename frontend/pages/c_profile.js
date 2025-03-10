@@ -9,7 +9,7 @@ export default{
         <label> Name:</label>
         <input type="text" v-model="name" :style="inputStyle" />
         <label>Email:</label>
-        <input type="email" v-model="email" :style="inputStyle" />
+        <input type="email" v-model="email"  :style="inputStyle" readonly />
         <label>Phone No.:</label>
         <input type="text" v-model="phone_no" :style="inputStyle" />
         <label>Pin Code:</label>
@@ -120,7 +120,7 @@ export default{
           { method:"PUT",
             headers:{'Content-Type': 'application/json',
             'Authentication-Token' : this.$store.state.auth_token},
-            body:JSON.stringify({name:this.name, address:this.address, phone_no:this.phone_no, email:this.email, pin_code:this.pin_code})
+            body:JSON.stringify({name:this.name, address:this.address, phone_no:this.phone_no, pin_code:this.pin_code})
         })
         if(res.ok){
           console.log('Profile updated')

@@ -14,6 +14,7 @@ export default {
         <!-- Admin Links -->
         <router-link v-if="$store.state.loggedIn && $store.state.role === 'admin'" to="/admin_d" :class="navLinkClass('/admin_d')">Admin Dash</router-link>
         <router-link v-if="$store.state.loggedIn && $store.state.role === 'admin'" to="/admin_search" :class="navLinkClass('/admin_search')">Search</router-link>
+        <router-link v-if="$store.state.loggedIn && $store.state.role === 'admin'" to="/admin_summary" :class="navLinkClass('/admin_summary')">Summary</router-link>
 
         <!-- Customer Links -->
         <router-link v-if="$store.state.loggedIn && $store.state.role === 'customer'" to="/c_search" :class="navLinkClass('/c_search')">Search</router-link>

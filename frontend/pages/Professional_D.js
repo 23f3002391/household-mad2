@@ -1,9 +1,16 @@
+import pr_profile from './pr_profile.js'
+
 export default{
     template: `
-  <div class="services-container" style="font-family: Arial, sans-serif; margin: 20px;">
+    
+  <div class="services-container" style="font-family: Arial, sans-serif; margin: 20px;" v-if='status=="Approved"' >
+  <div class='profile' style='margin-bottom:20px; text-align:center;'>
+    <button @click='profilePopup=true' style='background-color:#007bff; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer;'>View Profile</button>
+  </div>
+  <pr_profile v-if='profilePopup' :id='$store.state.user_id' @close='closeProfile' />
 
-    <!-- Today's Services Section -->
-    <h3 class="section-title" style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">Today's Services</h3>
+    <!-- Open Services Section -->
+    <h3 class="section-title" style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">Open Services</h3>
     <table class="table table-striped" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
         <thead style="background-color: #007bff; color: white;">
             <tr>
@@ -130,6 +137,9 @@ export default{
     </table >
 
   </div>
+  <div v-else-if='status=="Pending"' ><h1 style="text-align:center; color:#007bff; margin-top:20px;">You have not Approved Until Now By Admin</h1> </div>
+  <div v-else-if='status=="Rejected"' ><h1 style="text-align:center; color:#007bff; margin-top:20px;">You have been Rejected By Admin</h1> </div>
+  <div v-else-if='status=="Blocked"' ><h1 style="text-align:center; color:#007bff; margin-top:20px;">You have been Blocked For some interval of time By Admin</h1> </div>
 
 
     `,
@@ -138,11 +148,36 @@ export default{
             services:[],
             closedServices:[],
             rejected_Request:[],
-            accepted_Request:[]
+            accepted_Request:[],
+            profilePopup:false,
+            status: null,
+            data:[]
 
         }
     },
+    components:{
+      pr_profile
+    },
     methods:{
+      async checkApprovalStatus() {
+        const res = await fetch(location.origin + `/prof_status/${this.$store.state.user_id}`, {
+          method: "GET",
+          headers: {
+            "Authetication-Token": this.$store.state.auth_token
+          }
+        });
+  
+        if (res.ok) {
+          this.data= await res.json();
+          this.status=this.data.status
+          console.log('Approval status fetched:', this.status);
+        } else {
+          console.error(`Error fetching approval status: ${res.status}`);
+        }
+      },
+        closeProfile(){
+          this.profilePopup=false
+        },
         async offeredService(){
             const res= await fetch(location.origin + `/prof_service/${this.$store.state.user_id}`,
                 {
@@ -265,5 +300,6 @@ export default{
       this.acceptedRequest()
       this.rejectedRequest()
       this.serviceHistory()
+      this.checkApprovalStatus()
     }
 }

@@ -9,17 +9,20 @@ export default{
         <label> Name:</label>
         <input type="text" v-model="name" :style="inputStyle" />
         <label>Email:</label>
-        <input type="email" v-model="email" :style="inputStyle" />
+        <input type="email" v-model="email" :style="inputStyle" readonly />
         <label>Service Description:</label>
-        <input type="text" v-model="service_name" :style="inputStyle" />
+        <input type="text" v-model="service_name" :style="inputStyle" readonly />
         <label>Phone No.:</label>
         <input type="text" v-model="phone_no" :style="inputStyle" />
+        <label>Experience:</label>
+        <input type="text" v-model="experience" :style="inputStyle" />
         <label>Pin Code:</label>
         <input type="text" v-model="pin_code" :style="inputStyle" />
         <label>Address:</label>
         <textarea v-model="address" rows="3" :style="textareaStyle"></textarea>
         <div :style="buttonContainerStyle">
           <button type="submit" :style="submitButtonStyle">Submit</button>
+          <button type="button" @click="$emit('close')" :style="submitButtonStyle">Close</button>
         </div>
       </form>
     </div>
@@ -29,6 +32,7 @@ export default{
             name:null,
             address:null,
             phone_no:null,
+            experience:null,
             email:null,
             pin_code:null,
             service_name:null
@@ -38,19 +42,37 @@ export default{
     computed:{
       
         // Inline styles for elements
+        // overlayStyle() {
+        //   return {
+        //       position: "fixed",
+        //       top: "50%",
+        //       left: "50%",
+        //       transform: "translate(-50%, -50%)",
+        //       backgroundColor: "rgba(0,0,0,0.7)",
+        //       zIndex: 1000,
+        //       display: "block",
+        //       width: "100%",
+        //       height: "100%"
+        //   };
+        // },
         overlayStyle() {
           return {
               position: "fixed",
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              backgroundColor: "rgba(0,0,0,0.7)",
-              zIndex: 1000,
-              display: "block",
-              width: "100%",
-              height: "100%"
+              width: "45%",  // Adjusted for better fit
+              maxHeight: "80vh", // Limits height so buttons stay visible
+              backgroundColor: "white",
+              padding: "20px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              borderRadius: "10px",
+              boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+              overflowY: "auto", // Enables scrolling if needed
           };
-        },
+      },
         modalStyle() {
           return {
               position: "relative",
@@ -105,7 +127,7 @@ export default{
     },
     methods:{
       async get_professional(){
-        const res= await fetch(location.origin + `/api/professional/${id}` ,
+        const res= await fetch(location.origin + `/api/professional/${this.id}` ,
           { method:"GET",
             headers:{'Authentication-Token' : this.$store.state.auth_token}
 
@@ -115,7 +137,8 @@ export default{
           this.name= data.name
           this.address= data.address
           this.phone_no= data.phone_no
-          this.email= data.email
+          this.email= data.user.email
+          this.experience= data.experience
           this.pin_code= data.pin_code
           this.service_name= data.service_name
         } else{
@@ -125,11 +148,11 @@ export default{
       },
       async submitProfile(){
         
-        const res= await fetch(location.origin + `/api/professional/${id}` ,
+        const res= await fetch(location.origin + `/api/professional/${this.id}` ,
           { method:"PUT",
             headers:{'Content-Type': 'application/json',
             'Authentication-Token' : this.$store.state.auth_token},
-            body:JSON.stringify({name:this.name, address:this.address, phone_no:this.phone_no, email:this.email, pin_code:this.pin_code ,service_name:this.service_name})
+            body:JSON.stringify({name:this.name, address:this.address, phone_no:this.phone_no,experience:this.experience, pin_code:this.pin_code})
         })
         if(res.ok){
           console.log('Profile updated')

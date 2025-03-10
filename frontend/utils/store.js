@@ -33,6 +33,7 @@ const store = new Vuex.Store({
         }
     },
     actions : {
+        
         // actions commit mutations can be async
     }
 })

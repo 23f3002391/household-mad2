@@ -116,6 +116,7 @@ class UserListAPI(Resource):
         return users
 
 
+
 # Fields for a single user
 user_fields = {
     'id': fields.Integer,
@@ -137,25 +138,27 @@ class UserAPI(Resource):
         return user
 
 
-class NAAPI(Resource):
+# class NAAPI(Resource):
 
-    @auth_required('token')
-    @marshal_with(service_fields)
-    def get(self):
-        # Fetch services offered by professionals that the current user has interacted with
-        requests = Request.query.filter_by(customer_id=current_user.id).all()
-        service_ids = {request.service_id for request in requests}
-        services = Service.query.filter(Service.id.in_(service_ids)).all()
+#     @auth_required('token')
+#     @marshal_with(service_fields)
+#     def get(self):
+#         # Fetch services offered by professionals that the current user has interacted with
+#         requests = Request.query.filter_by(customer_id=current_user.id).all()
+#         service_ids = {request.service_id for request in requests}
+#         services = Service.query.filter(Service.id.in_(service_ids)).all()
 
-        if not services:
-            return {"message": "No services available"}, 200
-        return services
+#         if not services:
+#             return {"message": "No services available"}, 200
+#         return services
+
     
 customer_fields={
     "id": fields.Integer,
     "user_id":fields.Integer,
     "name": fields.String,
     "address": fields.String,
+    "phone_no": fields.String,
     "pin_code":fields.Integer,
     "user": fields.Nested({
         "email": fields.String,
@@ -173,12 +176,30 @@ class CustomerList(Resource):
 
         return customers
 
+class CustomerAPI(Resource):
+    @marshal_with(customer_fields)
+    @auth_required('token')
+    @roles_required('customer')
+    def get(self,id):
+        customer= CustomerInfo.query.filter_by(user_id= id).first()
+        return customer
+    def put(self,id):
+        data= request.get_json()
+        customer= CustomerInfo.query.filter_by(user_id= id).first()
+        customer.name= data.get('name')
+        customer.address= data.get('address')
+        customer.pin_code= data.get('pin_code')
+        customer.phone_no= data.get('phone_no')
+        db.session.commit()
+        return {"message": "Customer updated successfully"}
+
 professional_fields={
     "id": fields.Integer,
     "user_id":fields.Integer,
     "name": fields.String,
     "address": fields.String,
     "experience": fields.String,
+    "phone_no": fields.String,
     "service_name":fields.String,
     "pin_code": fields.Integer,
     "status": fields.String,
@@ -203,6 +224,22 @@ class ProfessionalIDField(fields.Raw):
             return "Not Assigned"
         return value  # Return the integer value if it exists
 
+class ProfessionalAPI(Resource):
+    @marshal_with(professional_fields)
+    @auth_required('token')
+    @roles_required('professional')
+    def get(self,id):
+        professional= ProfessionalInfo.query.filter_by(user_id =id).first()
+        return professional
+    def put(self,id):
+        data= request.get_json()
+        professional= ProfessionalInfo.query.filter_by(user_id = id).first()
+        professional.name= data.get('name')
+        professional.address= data.get('address')
+        professional.experience= data.get('experience')
+        professional.pin_code= data.get('pin_code')
+        db.session.commit()
+        return {"message": "Professional updated successfully"}
 
 request_fields={
     "id": fields.Integer,
@@ -246,6 +283,11 @@ request_fields={
     })
 
 }  
+
+
+
+
+
 class RequestList(Resource):
     @auth_required('token')
     @roles_required('admin')
@@ -336,4 +378,5 @@ api.add_resource(ServiceAPI, '/services/<int:service_id>')
 api.add_resource(ServiceListAPI, '/service_list')
 api.add_resource(UserListAPI, '/users')
 api.add_resource(UserAPI, '/users/<int:user_id>')
-api.add_resource(NAAPI, '/service/NAAPI')
+api.add_resource(CustomerAPI,'/customer/<int:id>')
+api.add_resource(ProfessionalAPI,'/professional/<int:id>')
