@@ -5,7 +5,7 @@ export default{
     
   <div class="services-container" style="font-family: Arial, sans-serif; margin: 20px;" v-if='status=="Approved"' >
   <div class='profile' style='margin-bottom:20px; text-align:center;'>
-    <button @click='profilePopup=true' style='background-color:#007bff; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer;'>View Profile</button>
+    <button @click='profilePopup=true' style='background-color:#007bff; color:white; border:none; padding:10px 15px; border-radius:5px; cursor:pointer;'>View/Edit Profile</button>
   </div>
   <pr_profile v-if='profilePopup' :id='$store.state.user_id' @close='closeProfile' />
 
@@ -32,7 +32,7 @@ export default{
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ request.customer.phone_no }}</td>
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ request.customer.address }}</td>
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ request.request_date }}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">{{ request.completion_date }}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{{ request.completion_date  }} | Not Accepted Still </td>
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ request.rating }}</td>
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ request.status }}</td>
                 <td style="padding: 8px; border: 1px solid #ddd;">
@@ -67,7 +67,7 @@ export default{
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ request.customer.phone_no }}</td>
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ request.customer.address }}</td>
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ request.request_date }}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">{{ request.completion_date }}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{{ request.completion_date  }} | Not Completed till Now  </td>
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ request.rating }}</td>
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ request.status }}</td>
             </tr >
@@ -97,7 +97,7 @@ export default{
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ request.customer.phone_no }}</td>
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ request.customer.address }}</td>
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ request.request_date }}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">{{ request.completion_date }}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">{{ request.completion_date  }} | Rejected </td>
                 <td style="padding: 8px; border: 1px solid #ddd;">{{ request.rating }}</td>
                 <td style =" padding :8 px ;border :1 px solid #ddd;">Rejected</td>
 
@@ -125,11 +125,11 @@ export default{
         <tbody>
             <tr v-for="request in closedServices" :key="request.id">
                 <td style="padding:8px;border:1px solid #ddd;">{{ request.id }}</td>
-                <td style="padding:8px;border:1px solid #ddd;">{{ request.customer.full_name }}</td>
+                <td style="padding:8px;border:1px solid #ddd;">{{ request.customer.name }}</td>
                 <td style="padding:8px;border:1px solid #ddd;" >{{ request.customer.phone_no }}</td>
                 <td style="padding:8px;border:1px solid #ddd;" >{{ request.customer.address }}</td>
-                <td style="padding:8px;border:1px solid #ddd;" >{{ request.date_of_request }}</td>
-                <td style="padding:8px;border:1px solid #ddd;" >{{ request.date_of_completion }}</td>
+                <td style="padding:8px;border:1px solid #ddd;" >{{ request.request_date }}</td>
+                <td style="padding:8px;border:1px solid #ddd;" >{{ request.completion_date }}</td>
                 <td style="padding:8px;border:1px solid #ddd;" >{{ request.rating }}</td>
                 <td style="padding:8px;border:1px solid #ddd;" >{{ request.status }}</td>
             </tr>

@@ -50,7 +50,7 @@ export default {
                 if (res.ok){
                     this.requestLabels = data.labels;
                     this.requestValues = data.values;
-                    this.renderCharts();
+                    
                     
                 }else{
                     const errorText = await res.text();
@@ -70,7 +70,7 @@ export default {
             if (res.ok){
                 this.ratingLabels = data.labels;
                 this.ratingValues = data.values;
-                this.renderCharts();
+                
                
             }
             else{
@@ -127,8 +127,13 @@ export default {
         }
     },
     mounted() {
-        this.fetchReqSummaryData();
-        this.fetchRatingSummaryData();
+        Promise.all([this.fetchReqSummaryData(), this.fetchRatingSummaryData()])
+        .then(() => {
+            this.renderCharts();
+        })
+        .catch(error => {
+            console.error("Error fetching data:", error);
+        });
         
     }
     

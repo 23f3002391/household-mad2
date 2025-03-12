@@ -1,40 +1,36 @@
 export default {
     props: ["category"],
     template: `
-      <div class="p-6 font-sans bg-gray-100 min-h-screen">
+      <div class="container py-4 bg-light min-vh-50">
     <!-- Title -->
-    <h3 class="text-2xl font-bold text-gray-800 text-center mb-6">
+    <h3 class="text-center fw-bold text-dark mb-4">
       Best {{ category }} Package
     </h3>
 
     <!-- Responsive Table -->
-    <div class="overflow-x-auto bg-white shadow-lg rounded-lg">
-      <table class="w-full border-collapse">
-        <thead>
-          <tr class="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-            <th class="th-style">ID</th>
-            <th class="th-style">Service Name</th>
-            <th class="th-style">Description</th>
-            <th class="th-style">Time Required</th>
-            <th class="th-style">Base Price</th>
-            <th class="th-style">Action</th>
+    <div class="table-responsive bg-white shadow-lg rounded p-3">
+      <table class="table table-bordered text-center">
+        <thead class="bg-primary text-white">
+          <tr>
+            <th>ID</th>
+            <th>Service Name</th>
+            <th>Description</th>
+            <th>Time Required</th>
+            <th>Base Price</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
-          <tr
-            v-for="service in services"
-            :key="service.id"
-            class="hover:bg-blue-50 transition duration-200"
-          >
-            <td class="td-style">{{ service.id }}</td>
-            <td class="td-style font-semibold text-blue-600">{{ service.name }}</td>
-            <td class="td-style">{{ service.description }}</td>
-            <td class="td-style">{{ service.time_required }} mins</td>
-            <td class="td-style text-green-600 font-bold">₹{{ service.price }}</td>
-            <td class="td-style text-center">
+          <tr v-for="service in services" :key="service.id">
+            <td>{{ service.id }}</td>
+            <td class="fw-semibold text-primary">{{ service.name }}</td>
+            <td>{{ service.description }}</td>
+            <td>{{ service.time_required }} hour</td>
+            <td class="fw-bold text-success">₹{{ service.price }}</td>
+            <td>
               <button
                 @click="$emit('book-request', service.id)"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg shadow-md transition duration-300"
+                class="btn btn-primary"
               >
                 Book 📅
               </button>

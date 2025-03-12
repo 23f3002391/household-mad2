@@ -77,7 +77,7 @@ export default {
                             <button v-if="professional.status==='Pending' "  @click = "approveProfessional(professional.id,'Approved')" class="btn btn-success" > Approve </button>
                             <button v-if="professional.status==='Pending' " @click = "approveProfessional(professional.id,'Rejected')" class="btn btn-danger" > Reject </button>
                             <button v-if="professional.status==='Approved' && professional.user.active" @click= "blockProfessional(professional.id)"  class="btn btn-warning" > Block </button>
-                            <button v-if="professional.status==='Approved' && !professional.user.active" @click="unblockProfessional(professional.id)"  class="btn btn-primary" > Unblock </button>
+                            <button v-if="professional.status==='Blocked' && !professional.user.active" @click="unblockProfessional(professional.id)"  class="btn btn-primary" > Unblock </button>
                         
                         </td>
                         
@@ -96,6 +96,8 @@ export default {
                     <tr>
                         <th>ID</th>
                         <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone-No</th>
                         <th>Address</th>
                         <th>Pin-Code</th>
                         <th>Status</th>
@@ -106,6 +108,8 @@ export default {
                     <tr v-for="customer in customers" :key="customer.id">
                         <td>{{ customer.id }}</td>
                         <td>{{ customer.name }}</td>
+                        <td>{{ customer.user.email }}</td>
+                        <td>{{ customer.phone_no }}</td>
                         <td>{{ customer.address }}</td>
                         <td>{{ customer.pin_code }}</td>
                         <td v-if="customer.user.active">Active</td>

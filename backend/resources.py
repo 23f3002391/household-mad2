@@ -51,13 +51,6 @@ class ServiceAPI(Resource):
         db.session.delete(service)
         db.session.commit()
 
-@auth_required('token')
-@app.route("/service_list/<string:category>",methods=["GET"])  
-@marshal_with(service_fields)  
-def s_list(category):
-    services= Service.query.filter_by(name=category).all()
-    return services
-
 class ServiceListAPI(Resource):
 
     @auth_required('token')
@@ -83,7 +76,12 @@ class ServiceListAPI(Resource):
         db.session.add(service)
         db.session.commit()
         return jsonify({'message': 'Service created successfully'})
-    
+@auth_required('token')
+@app.route("/service_list/<string:category>",methods=["GET"])  
+@marshal_with(service_fields)  
+def s_list(category):
+    services= Service.query.filter_by(name=category).all()
+    return services    
 
 
 # Fields for user listing
@@ -94,63 +92,8 @@ user_list_fields = {
     'active': fields.Boolean,
 }
 
-class UserListAPI(Resource):
 
-    @auth_required('token')
-    @marshal_with(user_list_fields)
-    def get(self):
-        query = request.args.get('query')
-
-        if query:
-            users = User.query.join(User.roles).filter(
-                Role.name == 'user',
-                User.active == True,
-                User.email.ilike(f'%{query}%')
-            ).all()
-        else:
-            users = User.query.join(User.roles).filter(
-                Role.name == 'user',
-                User.active == True
-            ).all()
-
-        return users
-
-
-
-# Fields for a single user
-user_fields = {
-    'id': fields.Integer,
-    'email': fields.String,
-    'service_id': fields.Integer,
-    'active': fields.Boolean,
-    'customer_requests': fields.List(fields.String),
-    'professional_requests': fields.List(fields.String),
-}
-
-class UserAPI(Resource):
-
-   
-    @marshal_with(user_fields)
-    def get(self, user_id):
-        user = User.query.get(user_id)
-        if not user:
-            return {"message": "User not found"}, 404
-        return user
-
-
-# class NAAPI(Resource):
-
-#     @auth_required('token')
-#     @marshal_with(service_fields)
-#     def get(self):
-#         # Fetch services offered by professionals that the current user has interacted with
-#         requests = Request.query.filter_by(customer_id=current_user.id).all()
-#         service_ids = {request.service_id for request in requests}
-#         services = Service.query.filter(Service.id.in_(service_ids)).all()
-
-#         if not services:
-#             return {"message": "No services available"}, 200
-#         return services
+#Customer Api
 
     
 customer_fields={
@@ -262,6 +205,7 @@ request_fields={
         "name": fields.String,
         "address": fields.String,
         "pin_code":fields.Integer,
+        "phone_no": fields.String,
         "user": fields.Nested({
             "email": fields.String,
             "active": fields.Boolean
@@ -283,9 +227,6 @@ request_fields={
     })
 
 }  
-
-
-
 
 
 class RequestList(Resource):
@@ -315,7 +256,8 @@ def Req_history(id):
     requests= Request.query.filter_by(customer_id = customer.id).all()
     return requests
 
-
+@auth_required('token')
+@roles_required('professional')
 @app.route('/prof_service/<string:u_id>',methods=["GET","POST"])
 @marshal_with(request_fields)
 def prof_offered_request(u_id):
@@ -331,7 +273,8 @@ def prof_offered_request(u_id):
               
     return offered_service
 
-
+@auth_required('token')
+@roles_required('professional')
 @app.route('/prof_closed_request/<string:u_id>',methods=["GET","POST"])
 @marshal_with(request_fields)
 def prof_closed_request(u_id):
@@ -339,6 +282,8 @@ def prof_closed_request(u_id):
     requests= Request.query.filter_by(professional_id= p1.id,status='Completed').all()
     return requests
 
+@auth_required('token')
+@roles_required('professional')
 @app.route('/prof_accepted_request/<string:u_id>',methods=["GET","POST"])
 @marshal_with(request_fields)
 def prof_accepted_request(u_id):
@@ -346,6 +291,8 @@ def prof_accepted_request(u_id):
     requests= Request.query.filter_by(professional_id= p1.id,status='Assigned').all()
     return requests
 
+@auth_required('token')
+@roles_required('professional')
 @app.route('/prof_rejected_request/<string:u_id>',methods=["GET","POST"]) 
 @marshal_with(request_fields)
 def rejectedRequest_by_prof(u_id):
@@ -371,12 +318,10 @@ def rejectedRequest_by_prof(u_id):
 
 
 # Add resources to the API
-api.add_resource(RequestList,"/request_list")
-api.add_resource(ProfessionalList,'/professional_list')
-api.add_resource(CustomerList,'/customer_list')
-api.add_resource(ServiceAPI, '/services/<int:service_id>')
-api.add_resource(ServiceListAPI, '/service_list')
-api.add_resource(UserListAPI, '/users')
-api.add_resource(UserAPI, '/users/<int:user_id>')
-api.add_resource(CustomerAPI,'/customer/<int:id>')
-api.add_resource(ProfessionalAPI,'/professional/<int:id>')
+api.add_resource(RequestList,"/request_list")  
+api.add_resource(ProfessionalList,'/professional_list') #displaying all  professionals
+api.add_resource(CustomerList,'/customer_list') # displaying all list of customers 
+api.add_resource(ServiceAPI, '/services/<int:service_id>') # dispalying and  editing and deleting a particular service
+api.add_resource(ServiceListAPI, '/service_list') #displaying alll services and create a service
+api.add_resource(CustomerAPI,'/customer/<int:id>')# displaying and editing the customer information
+api.add_resource(ProfessionalAPI,'/professional/<int:id>')# displaying AND editing the professional informations

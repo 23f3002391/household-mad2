@@ -23,7 +23,7 @@ def send_daily_reminders():
         pending_requests = Request.query.filter_by(professional_id=professional.id, status="Assigned").all()
         email_content = "<h2>Pending Service Requests</h2><ul>"
         for request in pending_requests:
-            email_content += f"<li>Request ID: {request.id}, Service: {request.service2.name}, Customer: {request.customer.name}</li>"
+            email_content += f"<li>Request ID: {request.id}, Service: {request.service2.name}, Service Description: {request.service2.description}, Customer: {request.customer.name}</li>"
         email_content += "</ul>"
 
         mail_reminder.delay(professional.user.email,"Daily Reminder: Pending Requests",email_content)
@@ -41,7 +41,7 @@ def send_monthly_reports():
 
 @celery_app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
-    sender.add_periodic_task(crontab(hour=15, minute=4), send_daily_reminders.s(), name="daily_reminders")
+    sender.add_periodic_task(crontab(hour=9, minute=58), send_daily_reminders.s(), name="daily_reminders")
     sender.add_periodic_task(crontab(hour=7, minute=0, day_of_month=1), send_monthly_reports.s(), name="monthly_reports")
 
 def generate_monthly_report(cust_id):

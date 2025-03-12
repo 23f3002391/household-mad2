@@ -145,6 +145,8 @@ def professionalRegister():
         return jsonify({"message": "Error creating user", "error": str(e)}), 400
     
 
+#Professional Api's
+
 @auth_required('token')
 @roles_required('admin')
 @app.route('/prof/<string:professionaId>/<string:status>',methods=["GET"])
@@ -153,6 +155,7 @@ def professional_approval(professionaId,status):
     p1.status= status
     db.session.commit() 
     return {"message": "Professional status updated successfully", "status": status}
+
 @auth_required('token')
 @roles_required('admin')
 @app.route('/profBlock/<string:status>/<string:professionaId>',methods=["GET"])
@@ -168,38 +171,10 @@ def professional_block_status(professionaId,status):
         u1.active= True
         p1.status= "Approved"
         db.session.commit() 
-        return {"message": "Professional block status updated successfully", "status": status}    
-
+        return {"message": "Professional block status updated successfully", "status": status}  
+      
 @auth_required('token')
-@roles_required('admin')
-@app.route('/customBlock/<string:status>/<string:c_id>',methods=["GET"])
-def customer_block_status(c_id,status):
-    c1= CustomerInfo.query.get(c_id)
-    u1=User.query.get(c1.user.id)
-    if status== 'block':
-        u1.active= False
-        db.session.commit() 
-        return {"message": "Professional block status updated successfully", "status": status}
-    else:
-        u1.active= True
-        db.session.commit() 
-        return {"message": "Professional block status updated successfully", "status": status}      
-
-@auth_required('token')
-@roles_required('customer')
-@app.route("/category_list",methods=["GET"])
-def service_categories():
-    categories= Service.query.all()
-    a= set()
-    for category in categories:
-        a.add(category.name.strip()) 
-    return list(a) 
-
-# @app.route("/service_list/<string:category>",methods=["GET"])    
-# def s_list(category):
-#     services= Service.query.filter_by(name=category).all()
-#     return services
-
+@roles_required('professional')
 @app.route('/prof_request_status/<string:u_id>/<string:req_id>/<string:status>',methods=["GET","POST"])
 def professional_request_status(u_id,req_id,status):
     p1= ProfessionalInfo.query.filter_by(user_id= u_id).first()
@@ -217,55 +192,41 @@ def professional_request_status(u_id,req_id,status):
         db.session.commit()
         return {"message": "profesional request status got updated"}
 
-   
+@auth_required('token')
+@roles_required('professional')    
+@app.route('/prof_status/<string:id>',methods=['GET'])
+def prof_status(id):
+    prof= ProfessionalInfo.query.filter_by(user_id=id).first()
+    return {"status": prof.status}
 
 
-
-
-
-@app.route('/dropdown/all_services',methods=["GET","POST"])
-def dropdown_s():
-    services= Service.query.all()
-    d_list=[]
-    for service in services:
-        d_list.append(service.description)
-    return d_list
-
-
-@app.route('/admin_search/<string:role>/<string:pname>', methods=['GET'])
-def admin_search(role, pname):
-    if role == "customer":
-        c1 = CustomerInfo.query.filter_by(name=pname).first()  # FIXED
-        if not c1:
-            return {"error": "Customer not found"}, 404  # FIXED
-        
-        return {
-            'id': c1.id,
-            'email': c1.user.email,
-            'user_id': c1.user.id,
-            'name': c1.name,
-            'address': c1.address,
-            'pin_code': c1.pin_code,
-            'active': c1.user.active   
-        }
-    
+## Customer Api's
+@auth_required('token')
+@roles_required('admin')
+@app.route('/customBlock/<string:status>/<string:c_id>',methods=["GET"])
+def customer_block_status(c_id,status):
+    c1= CustomerInfo.query.get(c_id)
+    u1=User.query.get(c1.user.id)
+    if status== 'block':
+        u1.active= False
+        db.session.commit() 
+        return {"message": "Professional block status updated successfully", "status": status}
     else:
-        p1 = ProfessionalInfo.query.filter_by(status=pname).first()  # FIXED
-        if not p1:
-            return {"error": "Professional not found"}, 404  # FIXED
-        
-        return {
-            'id': p1.id,
-            'email': p1.user.email,
-            'user_id': p1.user.id,
-            'name': p1.name,
-            'address': p1.address,
-            'pin_code': p1.pin_code, 
-            'experience': p1.experience,
-            'service_name': p1.service_name,
-            'status': p1.status,
-            'active': p1.user.active 
-        }
+        u1.active= True
+        db.session.commit() 
+        return {"message": "Professional block status updated successfully", "status": status}    
+      
+
+@auth_required('token')
+@roles_required('customer')
+@app.route("/category_list",methods=["GET"])
+def service_categories():
+    categories= Service.query.all()
+    a= set()
+    for category in categories:
+        a.add(category.name.strip()) 
+    return list(a) 
+
 @auth_required('token')
 @roles_required('customer')
 @app.route('/c_search/<string:category>/<string:query>', methods=['GET'])
@@ -333,11 +294,18 @@ def close_request():
         db.session.commit()
         return jsonify({"message": "Request edited successfully"}), 200
 
-@app.route('/prof_status/<string:id>',methods=['GET'])
-def prof_status(id):
-    prof= ProfessionalInfo.query.filter_by(user_id=id).first()
-    return {"status": prof.status}
+@auth_required('token')
+@roles_required('customer')
+@app.route('/dropdown/all_services',methods=["GET","POST"])
+def dropdown_s():
+    services= Service.query.all()
+    d_list=[]
+    for service in services:
+        d_list.append(service.description)
+    return d_list
 
+@auth_required('token')
+@roles_required('customer')
 @app.route('/customer_status/<string:id>',methods=["GET"])
 def customer_status(id):
     c1= CustomerInfo.query.filter_by(user_id=id).first()
@@ -348,11 +316,55 @@ def customer_status(id):
         return {"status": "Blocked"}
 
 
+# Admin Routes
+
+@auth_required('token')
+@roles_required('admin')
+@app.route('/admin_search/<string:role>/<string:pname>', methods=['GET'])
+def admin_search(role, pname):
+    if role == "customer":
+        c1 = CustomerInfo.query.filter_by(name=pname).first()  # FIXED
+        if not c1:
+            return {"error": "Customer not found"}, 404  # FIXED
+        
+        return {
+            'id': c1.id,
+            'email': c1.user.email,
+            'user_id': c1.user.id,
+            'name': c1.name,
+            'address': c1.address,
+            'pin_code': c1.pin_code,
+            'active': c1.user.active   
+        }
+    
+    else:
+        p1 = ProfessionalInfo.query.filter_by(status=pname).first()  # FIXED
+        if not p1:
+            return {"error": "Professional not found"}, 404  # FIXED
+        
+        return {
+            'id': p1.id,
+            'email': p1.user.email,
+            'user_id': p1.user.id,
+            'name': p1.name,
+            'address': p1.address,
+            'pin_code': p1.pin_code, 
+            'experience': p1.experience,
+            'service_name': p1.service_name,
+            'status': p1.status,
+            'active': p1.user.active 
+        }
+
+
+
+
+
     
     # Create a pie chart
 
     # Fetch total requests per customer
-    
+@auth_required('token')
+@roles_required('admin')    
 @app.route('/request_summary',methods=["GET"])
 def request_type_summary():
     requests=[request.status for request in Request.query.all() ]
