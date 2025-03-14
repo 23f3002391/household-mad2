@@ -1,11 +1,21 @@
-from flask import jsonify, request, current_app as app
+from flask import jsonify, request
 from flask_restful import Api, Resource, fields, marshal_with
 from flask_security import auth_required, current_user,roles_required
+import time
+from flask import current_app as app
 from backend.models import *
 
+datastore = app.security.datastore
 cache = app.cache
 
 api = Api(prefix='/api')
+
+
+
+@app.get('/cache')
+@cache.cached(timeout = 5)
+def cach():
+    return {'time' : str(datetime.now())}
 
 # Fields for service representation
 service_fields = {
@@ -111,6 +121,7 @@ customer_fields={
 
 
 class CustomerList(Resource):
+    @cache.cached(timeout=5, key_prefix="customer_list")
     @marshal_with(customer_fields)
     @auth_required('token')
     @roles_required("admin")
@@ -153,6 +164,7 @@ professional_fields={
 }
 
 class ProfessionalList(Resource):
+    @cache.cached(timeout=5, key_prefix="professional_list")
     @marshal_with(professional_fields)
     @auth_required('token')
     @roles_required('admin')
@@ -232,6 +244,7 @@ request_fields={
 class RequestList(Resource):
     @auth_required('token')
     @roles_required('admin')
+    @cache.cached(timeout=5, key_prefix="request_list")
     @marshal_with(request_fields)
     def get(self):
         requests= Request.query.all()
