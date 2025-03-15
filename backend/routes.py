@@ -332,13 +332,14 @@ def admin_search(role, pname):
             'email': c1.user.email,
             'user_id': c1.user.id,
             'name': c1.name,
+            'phone_no': c1.phone_no,
             'address': c1.address,
             'pin_code': c1.pin_code,
             'active': c1.user.active   
         }
     
     else:
-        p1 = ProfessionalInfo.query.filter_by(status=pname).first()  # FIXED
+        p1 = ProfessionalInfo.query.filter_by(name=pname).first()  # FIXED
         if not p1:
             return {"error": "Professional not found"}, 404  # FIXED
         
@@ -348,6 +349,7 @@ def admin_search(role, pname):
             'user_id': p1.user.id,
             'name': p1.name,
             'address': p1.address,
+            'phone_no': p1.phone_no,
             'pin_code': p1.pin_code, 
             'experience': p1.experience,
             'service_name': p1.service_name,

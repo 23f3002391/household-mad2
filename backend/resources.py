@@ -65,7 +65,6 @@ class ServiceListAPI(Resource):
 
     @auth_required('token')
     @roles_required("admin")
-    @cache.cached(timeout=5, key_prefix="service_list")
     @marshal_with(service_fields)
     def get(self):
         services = Service.query.all()
@@ -121,7 +120,6 @@ customer_fields={
 
 
 class CustomerList(Resource):
-    @cache.cached(timeout=5, key_prefix="customer_list")
     @marshal_with(customer_fields)
     @auth_required('token')
     @roles_required("admin")
@@ -164,7 +162,6 @@ professional_fields={
 }
 
 class ProfessionalList(Resource):
-    @cache.cached(timeout=5, key_prefix="professional_list")
     @marshal_with(professional_fields)
     @auth_required('token')
     @roles_required('admin')

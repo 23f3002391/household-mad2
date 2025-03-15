@@ -45,7 +45,7 @@ export default{
                             {{ client.service_name || 'Service not available' }}
                         </td>
                         <td class="border p-3">{{ client.address }}</td>
-                        <td class="border p-3" v-if="role==='professional'" >{{ client.phone_no }}</td>
+                        <td class="border p-3" >{{ client.phone_no }}</td>
                         <td class="border p-3">{{ client.pin_code }}</td>
                         <td class="border p-3 font-semibold" :class="client.active ? 'text-green-600' : 'text-red-600'">
                             {{ client.active ? 'Active' : 'Blocked' }}
@@ -115,7 +115,7 @@ export default{
                 }
             )
             if (res.ok){
-                this.proflist()
+                this.search()
                 console.log('professional got blocked')
             } else{
                 const errorText = await res.text(); // Fetch response body as text for more context
@@ -132,7 +132,7 @@ export default{
                 }
             )
             if (res.ok){
-                this.proflist()
+               this.search()
                 console.log('professional got unblocked')
             } else{
                 const errorText = await res.text(); // Fetch response body as text for more context
@@ -148,7 +148,7 @@ export default{
                 }
             )
             if (res.ok){
-                this.customerlist()
+                this.search()
                 console.log('customer got blocked')
             } else{
                 const errorText = await res.text(); // Fetch response body as text for more context
@@ -164,7 +164,7 @@ export default{
                 }
             )
             if (res.ok){
-                this.customerlist()
+                this.search()
                 console.log('customer got unblocked')
             } else{
                 const errorText = await res.text(); // Fetch response body as text for more context

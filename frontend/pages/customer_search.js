@@ -33,7 +33,7 @@ export default {
                     <td style="border: 1px solid #ddd; padding: 10px;">{{ service.time_required }}</td>
                     <td style="border: 1px solid #ddd; padding: 10px;">{{ service.price }}</td>
                     <td style="border: 1px solid #ddd; padding: 10px; text-align: center;">
-                        <button class="close-btn" @click="book_request('service.id')"
+                        <button class="close-btn" @click="book_request(service.id)"
                         style="background-color: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;"
                         >
                             Book
