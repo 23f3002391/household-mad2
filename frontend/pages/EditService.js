@@ -26,7 +26,7 @@ export default{
         </div>
 
         <div class="d-flex justify-content-between">
-          <button type="submit" class="btn btn-primary">Create</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
           <button type="button" class="btn btn-secondary" @click="$emit('close')">Cancel</button>
         </div>
       </form>

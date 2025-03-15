@@ -41,7 +41,7 @@ def send_monthly_reports():
 
 @celery_app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
-    sender.add_periodic_task(crontab(hour=9, minute=58), send_daily_reminders.s(), name="daily_reminders")
+    sender.add_periodic_task(crontab(hour=12, minute=4), send_daily_reminders.s(), name="daily_reminders")
     sender.add_periodic_task(crontab(hour=7, minute=0, day_of_month=1), send_monthly_reports.s(), name="monthly_reports")
 
 def generate_monthly_report(cust_id):
