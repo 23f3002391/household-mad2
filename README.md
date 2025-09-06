@@ -27,32 +27,32 @@ This project also includes a **Celery task scheduler** for background jobs and t
 
 
 ### 1️⃣ Clone the repository
-- **git clone https://github.com/your-username/household-service-app.git
-- **cd household-service-app
+- git clone https://github.com/your-username/household-service-app.git
+- cd household-service-app
 
 ### 2️⃣ Create a virtual environment (recommended)
-- **python -m venv venv
-- **source venv/bin/activate   # On macOS/Linux
-- **venv\Scripts\activate      # On Windows
+- python -m venv venv
+- source venv/bin/activate   # On macOS/Linux
+- venv\Scripts\activate      # On Windows
 
 ### 3️⃣ Install dependencies
-- **pip install -r requirements.txt
+- pip install -r requirements.txt
 
 ### 4️⃣ Run the application
-- **python app.py
+- python app.py
 
-# The app will now be running at:
-# 👉 http://127.0.0.1:5000/
+### The app will now be running at:
+ 👉 http://127.0.0.1:5000/
 
 ⏰ Running Celery (Task Scheduler)
 
 ###Make sure Redis or RabbitMQ is installed and running.
 
 ### Start Celery worker
-- **celery -A app.celery worker --loglevel=info
+- celery -A app.celery worker --loglevel=info
 
 ### Start Celery beat scheduler
-- **celery -A app.celery beat --loglevel=info
+- celery -A app.celery beat --loglevel=info
 
 ##👨‍💻 Author
 
