@@ -26,49 +26,36 @@ This project also includes a **Celery task scheduler** for background jobs and t
 ## 📦 Installation & Setup  
 
 
-# 1️⃣ Clone the repository
-git clone https://github.com/your-username/household-service-app.git
-cd household-service-app
+### 1️⃣ Clone the repository
+- **git clone https://github.com/your-username/household-service-app.git
+- **cd household-service-app
 
-# 2️⃣ Create a virtual environment (recommended)
-python -m venv venv
-source venv/bin/activate   # On macOS/Linux
-venv\Scripts\activate      # On Windows
+### 2️⃣ Create a virtual environment (recommended)
+- **python -m venv venv
+- **source venv/bin/activate   # On macOS/Linux
+- **venv\Scripts\activate      # On Windows
 
-# 3️⃣ Install dependencies
-pip install -r requirements.txt
+### 3️⃣ Install dependencies
+- **pip install -r requirements.txt
 
-# 4️⃣ Run the application
-python app.py
+### 4️⃣ Run the application
+- **python app.py
 
 # The app will now be running at:
 # 👉 http://127.0.0.1:5000/
 
 ⏰ Running Celery (Task Scheduler)
 
-##Make sure Redis or RabbitMQ is installed and running.
+###Make sure Redis or RabbitMQ is installed and running.
 
-# Start Celery worker
-celery -A app.celery worker --loglevel=info
+### Start Celery worker
+- **celery -A app.celery worker --loglevel=info
 
-# Start Celery beat scheduler
-celery -A app.celery beat --loglevel=info
+### Start Celery beat scheduler
+- **celery -A app.celery beat --loglevel=info
 
-📌 Project Structure
+##👨‍💻 Author
 
-household-service-app/
-│── app.py                 # Main Flask app
-│── requirements.txt       # Project dependencies
-│── templates/             # HTML templates
-│── static/                # CSS, JS, images
-│── models.py              # Database models
-│── tasks.py               # Celery tasks
-│── utils/                 # Helper functions
-│── README.md              # Documentation
+- **Developed by Aryan Pratihasta
 
-
-👨‍💻 Author
-
-Developed by Aryan Pratihasta
-
-Open for suggestions & improvements!
+- **Open for suggestions & improvements!
